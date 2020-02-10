@@ -2,7 +2,6 @@
 #include "Nodo.h"
 using namespace std;
 
-
 class ListaDoble{
 	private:
 		Nodo *cabeza;
