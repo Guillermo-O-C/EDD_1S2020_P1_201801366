@@ -109,6 +109,5 @@ void ListaCicular<T>::DeleteLast(){
         auxiliar = auxiliar->getNext();
     }
     aux->setNext(cabeza);
-    delete auxiliar;
     size--;
 }

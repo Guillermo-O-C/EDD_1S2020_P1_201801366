@@ -3,6 +3,7 @@
 #include "ListaDoble_t.h"
 #include "ListaSimple_t.h"
 #include "ListaCircular_t.h"
+#include "Pila_t.h"
 using namespace std;
 
 int main(){
@@ -32,8 +33,15 @@ int main(){
 	calendario.DeleteLast();
 	calendario.Insertar(3);
 	calendario.Imprimir();
-/*	Nodo<char> nuevo3('e');
-	lista.InsertAfter(nuevo, nuevo3);
-	lista.Imprimir();
-*/	return 0;
+
+	Pila<string> pila;
+    pila.Push("hey");
+    cout <<pila.ReturnTop()->getValue();
+    pila.Push("bro");
+    cout <<pila.ReturnTop()->getValue();
+    pila.Pop();
+    cout <<pila.ReturnTop()->getValue();
+    pila.Push("bitch");
+    cout <<pila.ReturnTop()->getValue();
+	return 0;
 };
