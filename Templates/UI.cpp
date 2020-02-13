@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <string>
+#include <fstream>
 #include "Nodo_t.h"
 #include "ListaDoble_t.h"
 #include "ListaSimple_t.h"
@@ -8,32 +9,30 @@
 
 using namespace std;
 
-string WinPrint(WINDOW win, ListaDoble<char> lista){
-    if(!lista.Empty())
-    {
+void GraphDoubleList(string name, ListaDoble<char> list){
 
-    }
+
 }
 
+
+
 void CrearArchivo(){
+    box(stdscr, 0, 0);
     noecho();
     ListaDoble<char> lista;
     int yMax, xMax, yBeg, xBeg;
     getmaxyx(stdscr, yMax, xMax);
-    WINDOW * inputwin = newwin(21, 78, 1, 1);
+    WINDOW * inputwin = newwin(yMax-3, xMax-2, 1, 1);
     getbegyx(inputwin, yBeg, xBeg);
     wrefresh(inputwin);
-    move(22,xMax/6);
+    move(yMax-1,xMax/6);
     printw("^w (Buscar y Reemplazar)    ^c(Reportes)    ^s(Guardar)");
     refresh();
     keypad(inputwin, TRUE);
-    box(inputwin, 0, 0);
     refresh();
-	wborder(inputwin, 0, 0, 0, 0, 0, 0, 0, 0);
     wrefresh(inputwin);
     wmove(inputwin, yBeg+1, xBeg+1);
     while(true){
-        refresh();
         wrefresh(inputwin);
         int character = wgetch(inputwin);
         if(character==23){
@@ -45,6 +44,22 @@ void CrearArchivo(){
         }else if(character==19){
             //Guardar
             wprintw(inputwin, "GUARDAR");
+            //Obtener el nombre del archivo
+            string name = "nuevo";
+            string content = "";
+            ofstream myfile;
+            myfile.open(name+".txt");
+            Nodo<char> *aux = lista.GetCabeza();
+            while(aux->getNext()!=NULL)
+            {
+                char c = aux->getValue();
+                content += aux->getValue();
+                aux = aux->getNext();
+            }
+            content += aux->getValue();
+            myfile << content;   //content of the new file
+            myfile.close();
+            break;
         }else if(character==24){
             //Salir
             int yMax, xMax;
@@ -53,7 +68,6 @@ void CrearArchivo(){
             //box(inputwin, 0, 0);
             mvprintw(yMax/2, xMax/3, "¡Hasta la proximaaaa!");
            // wrefresh(inputwin);
-           break;
         }else if(character==KEY_BACKSPACE){
             lista.DeleteLast();
         }else{
@@ -63,6 +77,8 @@ void CrearArchivo(){
             //refresh();
         }
         if(!lista.Empty()){
+            wclear(inputwin);
+            refresh();
             wrefresh(inputwin);
             wmove(inputwin, yBeg+1, xBeg+1);
             Nodo<char> *aux = lista.GetCabeza();
@@ -77,12 +93,15 @@ void CrearArchivo(){
 }
 
 void Menu(){
-    WINDOW * inputwin = newwin(22, 78, 1, 1);
+    wborder(stdscr,  0, 0, 0, 0, 0, 0, 0, 0);
+    int yMax, xMax;
+    getmaxyx(stdscr, yMax, xMax);
+    WINDOW * inputwin = newwin(yMax-2, xMax-2, 1, 1);
     keypad(inputwin, TRUE);
-    box(inputwin, 0, 0);
+    //box(inputwin, 0, 0);
     refresh();
-    wrefresh(inputwin);
-	wborder(inputwin, 0, 0, 0, 0, 0, 0, 0, 0);
+    wrefresh(stdscr);
+	//wborder(inputwin, 0, 0, 0, 0, 0, 0, 0, 0);
 	wattron(inputwin, A_REVERSE);
 	mvwprintw(inputwin, 1, 5, "UNIVERSIDAD DE SAN CARLOS DE GUATEMALA");			//moves wprintw(window, y, x, text);
     mvwprintw(inputwin, 2, 5, "FACULTAD DE INGENNIERIA");

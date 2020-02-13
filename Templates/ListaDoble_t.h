@@ -107,14 +107,20 @@ int ListaDoble<T>:: Buscar(T objeto){
 
 template <class T>
 void ListaDoble<T>::DeleteLast(){
-    Nodo<T> *aux = this->cabeza;
-    while(aux->getNext()!=NULL){
-        aux = aux->getNext();
+    if(!Empty()){
+        if(cabeza->getNext()==NULL){
+            cabeza=NULL;
+        }else{
+        Nodo<T> *aux = this->cabeza;
+        while(aux->getNext()!=NULL){
+            aux = aux->getNext();
+        }
+        Nodo<T> *temp = aux->getPrevious();
+        temp->setNext(NULL);
+        delete aux;
+        }
+        size--;
     }
-    Nodo<T> *temp = aux->getPrevious();
-    temp->setNext(NULL);
-    delete aux;
-    size--;
 }
 
 
