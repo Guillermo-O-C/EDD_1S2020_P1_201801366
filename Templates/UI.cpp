@@ -8,18 +8,22 @@
 
 using namespace std;
 
+string WinPrint(WINDOW win, ListaDoble<char> lista){
+    if(!lista.Empty())
+    {
+
+    }
+}
+
 void CrearArchivo(){
-    ListaDoble<char> lista; //DELCARANDO NUEVA LISTA DE CARACTERERS
-    //SEGUIR ACÁ
-    //
-    //
-    //
+    noecho();
+    ListaDoble<char> lista;
     int yMax, xMax, yBeg, xBeg;
     getmaxyx(stdscr, yMax, xMax);
     WINDOW * inputwin = newwin(21, 78, 1, 1);
     getbegyx(inputwin, yBeg, xBeg);
     wrefresh(inputwin);
-    //move(22,xMax/6);
+    move(22,xMax/6);
     printw("^w (Buscar y Reemplazar)    ^c(Reportes)    ^s(Guardar)");
     refresh();
     keypad(inputwin, TRUE);
@@ -29,6 +33,8 @@ void CrearArchivo(){
     wrefresh(inputwin);
     wmove(inputwin, yBeg+1, xBeg+1);
     while(true){
+        refresh();
+        wrefresh(inputwin);
         int character = wgetch(inputwin);
         if(character==23){
             //Buscar y Reemplazar
@@ -39,20 +45,33 @@ void CrearArchivo(){
         }else if(character==19){
             //Guardar
             wprintw(inputwin, "GUARDAR");
-        }
-        if(character==24){
+        }else if(character==24){
             //Salir
             int yMax, xMax;
             getmaxyx(stdscr, yMax, xMax);
-            noecho();
             clear();
             //box(inputwin, 0, 0);
             mvprintw(yMax/2, xMax/3, "¡Hasta la proximaaaa!");
            // wrefresh(inputwin);
            break;
+        }else if(character==KEY_BACKSPACE){
+            lista.DeleteLast();
         }else{
+            lista.Insertar(character);
+            wrefresh(inputwin);
             //printw("%d",character);
-            refresh();
+            //refresh();
+        }
+        if(!lista.Empty()){
+            wrefresh(inputwin);
+            wmove(inputwin, yBeg+1, xBeg+1);
+            Nodo<char> *aux = lista.GetCabeza();
+            while(aux->getNext()!=NULL)
+            {
+                char c = aux->getValue();
+                wprintw(inputwin, "%c", c);
+                aux = aux->getNext();
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ class ListaDoble{
 		void Insertar(T value);
 		void Imprimir();
 		int GetSize();
+		Nodo<T>* GetCabeza();
 		bool Empty();
 		int Buscar(T objeto);
 		void InsertAfter(Nodo<T> lugar, Nodo<T> nuevo);
@@ -44,6 +45,10 @@ void ListaDoble<T>:: Insertar(T value){
 template <class T>
 int ListaDoble<T>:: GetSize(){
 	return size;
+}
+template <class T>
+Nodo<T>* ListaDoble<T>:: GetCabeza(){
+	return cabeza;
 }
 template <class T>
 bool ListaDoble<T>:: Empty(){
@@ -111,6 +116,8 @@ void ListaDoble<T>::DeleteLast(){
     delete aux;
     size--;
 }
+
+
 
 
 
