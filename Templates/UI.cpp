@@ -9,9 +9,31 @@
 
 using namespace std;
 
-void GraphDoubleList(string name, ListaDoble<char> list){
+void Menu();
 
-
+string  GraphDoubleList(ListaDoble<char> list){
+    std::string graph ("digraph ReporteLD { \n rankdir =LR; \n size=\"5\" \n node [shape = circle]; \n");
+    Nodo<char> *aux = list.GetCabeza();
+    Nodo<char> *previous = aux;
+    for(int i =0; i<list.GetSize(); i++){
+        string number = "_"+ std::to_string(i);
+        string prevNumber = "_"+std::to_string((i-1));
+        //NULL pointers to the graph edges
+        if(i==0){
+            graph +=  aux->getValue() + std::string( number + " -> NULL_;\n");
+        }
+        //The rest of the nodes
+        else{
+            previous = aux;
+            aux=aux->getNext();
+            graph += previous->getValue() + std::string(prevNumber + " -> " + aux->getValue() + number +";\n");
+            graph += aux->getValue() + std::string( number + " -> " + previous->getValue() + prevNumber +";\n");
+            if(i==list.GetSize()-1){
+                    graph +=  aux->getValue() + std::string( number + " -> _NULL;\n");
+            }
+        }
+    }
+    return graph;
 }
 
 
@@ -19,6 +41,8 @@ void GraphDoubleList(string name, ListaDoble<char> list){
 void CrearArchivo(){
     box(stdscr, 0, 0);
     noecho();
+    cbreak();
+    raw();
     ListaDoble<char> lista;
     int yMax, xMax, yBeg, xBeg;
     getmaxyx(stdscr, yMax, xMax);
@@ -40,15 +64,38 @@ void CrearArchivo(){
             wprintw(inputwin, "BUSCAR");
         }else if(character==3){
             //Reportes
-            wprintw(inputwin, "REPORTES");
+                 if(!lista.Empty()){
+
+                    ofstream graphFile;
+                    graphFile.open("SavedFiles/ReporteDL.txt");
+                    graphFile << GraphDoubleList(lista);
+                    graphFile.close();
+
+                    mvwprintw(inputwin, yMax-5, xMax-(xMax-3), "GENERANDO GRÁFICO...");
+                    wrefresh(inputwin);
+                    getch();
+                    break;
+                }else{
+                    wprintw(inputwin, "No se ha introducido texto, intentalo de nuevo");
+                    wrefresh(inputwin);
+                    break;
+                }
         }else if(character==19){
             //Guardar
-            wprintw(inputwin, "GUARDAR");
-            //Obtener el nombre del archivo
-            string name = "nuevo";
+            //Obtener el nombre del archivo~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~++
+            //WINDOW * FileName = newwin(3, 40, 1, 1);
+            //box(FileName, 0, 0);
+            //char nombre = wgetch(FileName);
+            //wrefresh(FileName);
+            //string name = getnstr(FileName, );
+            //string name=nombre+".txt";
+            string name ="SavedFiles/contenido_consola.txt";
+            mvwprintw(inputwin, yMax-5, xMax-(xMax-3), "GUARDANDO ARCHIVO...");
+            wrefresh(inputwin);
+            getch();
             string content = "";
             ofstream myfile;
-            myfile.open(name+".txt");
+            myfile.open(name);
             Nodo<char> *aux = lista.GetCabeza();
             while(aux->getNext()!=NULL)
             {
@@ -65,9 +112,10 @@ void CrearArchivo(){
             int yMax, xMax;
             getmaxyx(stdscr, yMax, xMax);
             clear();
-            //box(inputwin, 0, 0);
+            box(inputwin, 0, 0);
+            wrefresh(inputwin);
             mvprintw(yMax/2, xMax/3, "¡Hasta la proximaaaa!");
-           // wrefresh(inputwin);
+            break;
         }else if(character==KEY_BACKSPACE){
             lista.DeleteLast();
         }else{
@@ -88,8 +136,11 @@ void CrearArchivo(){
                 wprintw(inputwin, "%c", c);
                 aux = aux->getNext();
             }
+            char c = aux->getValue();
+                wprintw(inputwin, "%c", c);
         }
     }
+    Menu();
 }
 
 void Menu(){
