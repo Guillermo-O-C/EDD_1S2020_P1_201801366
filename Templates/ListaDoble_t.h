@@ -14,6 +14,7 @@ class ListaDoble{
 			this->size=0;
 		}
 		void Insertar(T value);
+		void SetCabeza(Nodo<T>* nuevo);
 		void Imprimir();
 		int GetSize();
 		Nodo<T>* GetCabeza();
@@ -65,10 +66,11 @@ void ListaDoble<T>:: Imprimir(){
 				if(Empty()){
 					 cout << "La lista está vacía" ;
 				}else{
-					for(int i =0; i<size;i++){
+					while(aux->getNext()!=NULL){
 						cout << aux->getValue();
 						aux = aux->getNext();
 					}
+                    cout << aux->getValue();
 					cout << "\n";
 				}
 		}
@@ -121,6 +123,13 @@ void ListaDoble<T>::DeleteLast(){
         }
         size--;
     }
+}
+
+template <class T>
+void ListaDoble<T>::SetCabeza(Nodo<T> *nuevo){
+    Nodo<T> *aux = cabeza->getNext();
+    nuevo->setNext(aux);
+    cabeza =nuevo;
 }
 
 

@@ -12,7 +12,7 @@ using namespace std;
 void Menu();
 
 string  GraphDoubleList(ListaDoble<char> list){
-    std::string graph ("digraph ReporteLD { \n rankdir =LR; \n size=\"5\" \n node [shape = circle]; \n");
+    std::string graph ("digraph ReporteLD { graph [dpi=300]\n rankdir =LR; \n size=\"5\" \n node [shape = circle]; \n");
     Nodo<char> *aux = list.GetCabeza();
     Nodo<char> *previous = aux;
     for(int i =0; i<list.GetSize(); i++){
@@ -29,7 +29,7 @@ string  GraphDoubleList(ListaDoble<char> list){
             graph += previous->getValue() + std::string(prevNumber + " -> " + aux->getValue() + number +";\n");
             graph += aux->getValue() + std::string( number + " -> " + previous->getValue() + prevNumber +";\n");
             if(i==list.GetSize()-1){
-                    graph +=  aux->getValue() + std::string( number + " -> _NULL;\n");
+                    graph +=  aux->getValue() + std::string( number + " -> _NULL;\n}");
             }
         }
     }
@@ -67,18 +67,18 @@ void CrearArchivo(){
                  if(!lista.Empty()){
 
                     ofstream graphFile;
-                    graphFile.open("SavedFiles/ReporteDL.txt");
+                    string name = "Prueba";
+                    graphFile.open("SavedFiles/"+name+".txt");
                     graphFile << GraphDoubleList(lista);
                     graphFile.close();
+                    std::string filePath="dot -Tpng SavedFiles/"+name+".txt -o SavedFiles/"+name+".png";
+                    system(filePath.c_str());
 
-                    mvwprintw(inputwin, yMax-5, xMax-(xMax-3), "GENERANDO GRÁFICO...");
+                    mvwprintw(inputwin, yMax-5, xMax-(xMax-3), "GENERANDO GRAFICO...");
                     wrefresh(inputwin);
-                    getch();
-                    break;
                 }else{
                     wprintw(inputwin, "No se ha introducido texto, intentalo de nuevo");
                     wrefresh(inputwin);
-                    break;
                 }
         }else if(character==19){
             //Guardar
@@ -106,7 +106,6 @@ void CrearArchivo(){
             content += aux->getValue();
             myfile << content;   //content of the new file
             myfile.close();
-            break;
         }else if(character==24){
             //Salir
             int yMax, xMax;
@@ -140,7 +139,6 @@ void CrearArchivo(){
                 wprintw(inputwin, "%c", c);
         }
     }
-    Menu();
 }
 
 void Menu(){
