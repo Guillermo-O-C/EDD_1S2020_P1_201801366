@@ -18,6 +18,7 @@ class ListaDoble{
 		void Imprimir();
 		int GetSize();
 		Nodo<T>* GetCabeza();
+		Nodo<T>* GetLast();
 		bool Empty();
 		int Buscar(T objeto);
 		void InsertAfter(Nodo<T> lugar, Nodo<T> nuevo);
@@ -132,6 +133,20 @@ void ListaDoble<T>::SetCabeza(Nodo<T> *nuevo){
     cabeza =nuevo;
 }
 
+template <class T>
+Nodo<T>* ListaDoble<T>::GetLast(){
+    if(!Empty()){
+        if(cabeza->getNext()==NULL){
+            cabeza=NULL;
+        }else{
+            Nodo<T> *aux = this->cabeza;
+            while(aux->getNext()!=NULL){
+                aux = aux->getNext();
+            }
+            return aux;
+        }
+    }
+}
 
 
 

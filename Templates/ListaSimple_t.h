@@ -14,7 +14,9 @@ class ListaSimple{
 		void Insertar(T value);
 		void Imprimir();
 		int GetSize();
+		Nodo<T>* GetCabeza();
 		bool Empty();
+		void DeleteLast();
 };
 template <class T>
 void ListaSimple<T>:: Insertar(T value){
@@ -46,6 +48,10 @@ bool ListaSimple<T>:: Empty(){
 }
 
 template <class T>
+Nodo<T>* ListaSimple<T>:: GetCabeza(){
+	return cabeza;
+}
+template <class T>
 void ListaSimple<T>:: Imprimir(){
 				Nodo<T> *aux = this->cabeza;
 				if(Empty()){
@@ -58,3 +64,21 @@ void ListaSimple<T>:: Imprimir(){
 					cout << "\n";
 				}
 		}
+template <class T>
+void ListaSimple<T>::DeleteLast(){
+    if(!Empty()){
+        if(cabeza->getNext()==NULL){
+            cabeza=NULL;
+        }else{
+        Nodo<T> *aux = this->cabeza;
+        Nodo<T> *last = aux;
+        while(aux->getNext()!=NULL){
+            last = aux;
+            aux = aux->getNext();
+        }
+        last->setNext(NULL);
+        delete aux;
+        }
+        size--;
+    }
+}

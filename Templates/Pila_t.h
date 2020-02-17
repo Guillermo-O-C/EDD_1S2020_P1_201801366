@@ -17,6 +17,7 @@ class Pila{
 		}
 		void Push(T value);
 		Nodo<T>* Pop();
+		void SuperPop();
 		void Imprimir();        //Pendiente
 		int GetSize();
 		bool Empty();
@@ -87,4 +88,12 @@ Nodo<T>* Pila<T>::Pop(){
     this->cabeza= this->cabeza->getNext();
     size--;
     return auxiliar;
+}
+
+template <class T>
+void Pila<T>::SuperPop(){
+    while(!Empty()){
+        Pop();
+    }
+    size=0;
 }

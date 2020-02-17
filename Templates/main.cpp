@@ -5,6 +5,7 @@
 #include "ListaCircular_t.h"
 #include "Pila_t.h"
 #include "Palabra.h"
+#include "Cambio.h"
 using namespace std;
 
 
@@ -19,8 +20,7 @@ ListaDoble<char> BuscaryReemplazar(ListaDoble<char> lista, string buscado, strin
     cout << "\n While Starts\n";
     while(aux->getNext()!=NULL){
         if(aux->getPrevious()== NULL || aux->getPrevious()->getValue()==' ' || i>0){    //Verifica que no sean caracteres dentro de una palabra
-
-        cout <<"\n"<<aux->getValue() <<"compares"<<buscado[i]<<"\n";
+            cout <<"\n"<<aux->getValue() <<"compares"<<buscado[i]<<"\n";
             if(aux->getValue()==buscado[i]){
                 if(i==0){
                     inicio = aux;
@@ -28,7 +28,7 @@ ListaDoble<char> BuscaryReemplazar(ListaDoble<char> lista, string buscado, strin
                 i++;
                 if(aux->getNext()== NULL || aux->getNext()->getValue()==' ' || aux->getNext()->getValue()=='\n' || i>0){ //Verifica que sea el final de la palabra
                     if(i==buscado.size()){
-    cout << buscado.size()<< "\n match " <<remplazo.size() <<"\n";
+                    cout << buscado.size()<< "\n match " <<remplazo.size() <<"\n";
                         Nodo<char> *anterior;
                         for(int e = 0; e<=remplazo.size();e++){
                             Nodo<char> *temporal = new Nodo<char>(remplazo[e]);
@@ -57,10 +57,8 @@ ListaDoble<char> BuscaryReemplazar(ListaDoble<char> lista, string buscado, strin
                                 //temporal->setNext(anterior->getNext());
                                 anterior->setNext(temporal);
                                 temporal->getNext()->setPrevious(temporal);
-
                                 //Nodo<char> *last = anterior->getNext();
                                 //last->setPrevious(temporal);
-
                                 //anterior->setNext(temporal);
                                 //temporal->setPrevious(last);
                                 //anterior=temporal;
@@ -75,7 +73,6 @@ ListaDoble<char> BuscaryReemplazar(ListaDoble<char> lista, string buscado, strin
             }else{
                 i=0;
             }
-
         }
         aux= aux->getNext();
     }
@@ -83,7 +80,26 @@ ListaDoble<char> BuscaryReemplazar(ListaDoble<char> lista, string buscado, strin
     return lista;
 }
 
+ListaDoble<char> StringToChar(string content){
+    ListaDoble<char> newList;
+    for(int i=0; i<content.size();i++){
+        newList.Insertar(content[i]);
+    }
+    return newList;
+}
 
+string CharToString(ListaDoble<char> lista){
+    string content;
+    Nodo<char> *aux = lista.GetCabeza();
+    while(aux->getNext()!=NULL){
+        char c = aux->getValue();
+        content+=c;
+        aux= aux->getNext();
+    }
+    char c = aux->getValue();
+    content+=c;
+    return content;
+}
 int main(){
 	ListaDoble<char> lista;
 	lista.Insertar('H');
@@ -117,6 +133,10 @@ int main(){
 	lista = BuscaryReemplazar(lista, "Hola", "Bueno Beno");
 	cout <<"new string: ";
 	lista.Imprimir();
+	ListaDoble<char> nueva = StringToChar("Hola prros");
+	nueva.Imprimir();
+	string antes = CharToString(nueva);
+	cout <<antes;
 	ListaSimple<string> list;
 	list.Insertar(" hola ");
 	list.Insertar(" hijos ");
