@@ -9,11 +9,15 @@
 #include "Cambio.h"
 
 using namespace std;
-
+static ListaCicular<string> *circular = new ListaCicular<string>();
 void Menu();
-ListaDoble<char> BuscaryReemplazar(ListaDoble<char> lista, string buscado, string remplazo, int x);
+ListaDoble<char> BuscaryReemplazar(ListaDoble<char> lista, string buscado, string remplazo, int x, Pila<Cambio> *ctrlZ);
 ListaDoble<char> StringToChar(string content);
 string CharToString(ListaDoble<char> lista);
+int Searching(WINDOW *win, ListaDoble<char> lista, int yMax, Pila<Cambio> *ctrlZ);
+string GraphLog(Pila<Cambio> *Z, Pila<Cambio> *Y);
+void InsertarEnPila(Pila<Cambio> *ctrlZ, Cambio change);
+void ArchivosRecientes();
 //changed all lista for list
 string  GraphDoubleList(ListaDoble<char> lista){
     std::string graph ("digraph ReporteLD { graph [dpi=300]\n rankdir =LR; \n size=\"5\" \n node [shape = circle]; \n");
@@ -40,94 +44,25 @@ string  GraphDoubleList(ListaDoble<char> lista){
     return graph;
 }
 
-
-
-void Buscar(){
-    int yMax, xMax, yBeg, xBeg;
-    getmaxyx(stdscr, yMax, xMax);
-    WINDOW * searchWin = newwin(2, xMax-5, yMax-5, 1);
-    getbegyx(searchWin, yBeg, xBeg);
-    //box(searchWin, 0,0);
-    wrefresh(searchWin);
-    keypad(searchWin, TRUE);
-    string buscado, reemplazo = "";
-    ListaDoble<char> temp ;
-    wattron(searchWin,A_REVERSE);
-    wattroff(searchWin,A_REVERSE);
-    wrefresh(searchWin);
-    wmove(searchWin, 1,1);
-    while(true){
-        int character = wgetch(searchWin);
-        //wprintw(searchWin, "%c", character);
-        if(character==10){
-            wprintw(searchWin, "ENTER");
-            Nodo<char> *aux = temp.GetCabeza();
-            wprintw(searchWin, "%c", aux->getValue());
-            bool first = true;
-            int u = 0;
-            while(aux->getNext()!=NULL){
-                /*
-                if(aux->getValue()==';'){
-                first=false;
-                }
-                if(first){
-                    char c = aux->getValue();
-                    wprintw(searchWin, "%c", aux->getValue());
-                    buscado += aux->getValue();
-                }else{
-                    char c = aux->getValue();
-                    wprintw(searchWin, "%c", aux->getValue());
-                    reemplazo += aux->getValue();
-                }
-                aux = aux->getNext();
-                */
-                u++;
-                break;
-                clear();
-                wrefresh(searchWin);
-            }
-            wprintw(searchWin, "%d", u);
-        }else if(character==KEY_BACKSPACE){
-            temp.DeleteLast();
-        }else if(character==24){
-            //Salir
-            int yMax, xMax;
-            getmaxyx(stdscr, yMax, xMax);
-            clear();
-            box(searchWin, 0, 0);
-            wrefresh(searchWin);
-            mvprintw(yMax/2, xMax/3, "¡Hasta la proximaaaa!");
-            break;
-        }else{
-            temp.Insertar(character);
-        }
-        if(!temp.Empty()){
-            wclear(searchWin);
-            refresh();
-            wrefresh(searchWin);
-            wmove(searchWin, yBeg+1, xBeg+1);
-            Nodo<char> *aux = temp.GetCabeza();
-            while(aux->getNext()!=NULL)
-            {
-                char c = aux->getValue();
-                wprintw(searchWin, "%c", c);
-                aux = aux->getNext();
-            }
-            char c = aux->getValue();
-                wprintw(searchWin, "%c", c);
-        }
-        int palabrasAfectadas;
-        //BuscaryReemplazar(lista, "", "", palabrasAfectadas);
+void DuplicatePila(Pila<Cambio> *original, Pila<Cambio> *copia){
+    if(!original->Empty()){
+        Nodo<Cambio> *aux = original->Pop();
+        DuplicatePila(original, copia);
+        original->Push(aux->getValue());
+        copia->Push(aux->getValue());
     }
 }
-
-void CrearArchivo(){
+void CrearArchivo(string origin, bool creado){
     box(stdscr, 0, 0);
     noecho();
     cbreak();
     raw();
     ListaDoble<char> lista;
-    Pila<Cambio> ctrlZ, ctrlY;
+    if(creado){
+        lista = StringToChar(origin);
+    }
+    Pila<Cambio> *ctrlZ = new Pila<Cambio>();
+    Pila<Cambio> *ctrlY = new Pila<Cambio>();
     int yMax, xMax, yBeg, xBeg;
     getmaxyx(stdscr, yMax, xMax);
     WINDOW * inputwin = newwin(yMax-3, xMax-2, 1, 1);
@@ -140,40 +75,52 @@ void CrearArchivo(){
     refresh();
     wrefresh(inputwin);
     wmove(inputwin, yBeg+1, xBeg+1);
+    bool busqueda=false;
+    bool salida = false;
     while(true){
         wrefresh(inputwin);
         int character = wgetch(inputwin);
         if(character==23){
             //Buscar y Reemplazar
-            mvwprintw(inputwin, yMax-5, 3, "Buscando...");
-            char busqueda[100];
-            echo();
-            mvwgetnstr(inputwin, yMax-4, 3, busqueda, 99);
-            wrefresh(inputwin);
+            int e = Searching(inputwin, lista, yMax, ctrlZ);
+            wclear(inputwin);
+            mvwprintw(inputwin, 1, 1, "Se encontraron %d", e);
+            wgetch(inputwin);
+            /*
+            mvwprintw(inputwin, yMax-5, 3, "Palabra Buscada; Palabra De Reemplazo");
+            int c;
+            string entrada="";
+            while(c!=10){
+                wrefresh(inputwin);
+                c=mvwgetch(inputwin, yMax-4, 3);
+                entrada+=c;
+                refresh();
+                wrefresh(inputwin);
+            }
             string buscado, reemplazo;
             bool first = true;
-            for(int i = 0 ; i<=99;i++){
-                if(busqueda[i]!=0){
-                    if(busqueda[i]==' '){
+            for(int i = 0 ; i<entrada.size()-1;i++){
+                    if(entrada[i]==';'){
                         first = false;
-                    }
-                    if(first){
-                        buscado+=busqueda[i];
+                    }else if(first){
+                        buscado+=entrada[i];
                     }else{
-                        reemplazo+=busqueda[i];
+                        reemplazo+=entrada[i];
                     }
-                }
             }
             mvwprintw(inputwin, yMax-5, 3, "CAMBIANDO...");
             wrefresh(inputwin);
             int x=0;
             lista = BuscaryReemplazar(lista, buscado, reemplazo, x);
             if(x>0){
-                mvwprintw(stdscr, 0, 0,"hay match");
-                refresh();
+                mvwprintw(inputwin, 0, 0,"La cantida de coincidencias es: ", "%d", x);
+                wrefresh(inputwin);
+            }else{
+                mvwprintw(inputwin, 0, 0,"No hay coincidencias", "%d", x);
+                wrefresh(inputwin);
             }
-            mvwprintw(inputwin, yMax-5, 3, "%s",reemplazo);
             wrefresh(inputwin);
+            */
         }else if(character==3){
             //Reportes
             noecho();
@@ -182,8 +129,6 @@ void CrearArchivo(){
             wattroff(inputwin, A_REVERSE);
             wrefresh(inputwin);
             int option = wgetch(inputwin);
-            mvwprintw(inputwin, yMax-4, 3, "%d", option);
-            wrefresh(inputwin);
             getch();
             if(option==49){
                 //Reporte Lista
@@ -195,31 +140,49 @@ void CrearArchivo(){
                     graphFile.close();
                     std::string filePath="dot -Tpng SavedFiles/"+name+".txt -o SavedFiles/"+name+".png";
                     system(filePath.c_str());
-                    mvwprintw(inputwin, yMax-5, xMax-(xMax-3), "GENERANDO GRAFICO...");
+                    mvwprintw(inputwin, yMax-5,3, "GENERANDO GRAFICO...");
+                    wgetch(inputwin);
                     wrefresh(inputwin);
                 }else{
-                    wprintw(inputwin, "No se ha introducido texto, intentalo de nuevo");
+                    mvwprintw(inputwin,1,1, "No se ha introducido texto, intentalo de nuevo");
                     wrefresh(inputwin);
                 }
             }else if(option==50){
                 //Reporte Buscada
-
+                ofstream graphFile;
+                graphFile.open("SavedFiles/Pilas.txt");
+                graphFile << GraphLog(ctrlZ, ctrlY);
+                graphFile.close();
+                std::string filePath="dot -Tpng SavedFiles/Pilas.txt -o SavedFiles/Pilas.png";
+                system(filePath.c_str());
+                mvwprintw(inputwin, yMax-5,3, "GENERANDO GRAFICO...");
+                wgetch(inputwin);
+                wrefresh(inputwin);
             }else if(option==51){
                 //Reporte Ordenada
-
             }
         }else if(character==19){
             //Guardar
             char nombre[100];
             echo();
-            mvwprintw(inputwin, yMax-5, 3, "Introduce el nombre del documento");
+            mvwprintw(inputwin, yMax-5, 3, "Introduce el nombre del documento\n\t");
             wrefresh(inputwin);
-            mvwgetnstr(inputwin, yMax-4, 3, nombre, 99);
+            //mvwgetnstr(inputwin, yMax-4, 3, nombre, 99);
+            echo();
+            int c;
+            string entrada="SavedFiles/";
+            while(c!=10){
+                wrefresh(inputwin);
+                c=wgetch(inputwin);
+                entrada+=c;
+                refresh();
+                wrefresh(inputwin);
+            }
             mvwprintw(inputwin, yMax-5, xMax-(xMax-3), "GUARDANDO ARCHIVO...");
             wrefresh(inputwin);
             string content = "";
             ofstream myfile;
-            myfile.open(nombre);
+            myfile.open(entrada);
             Nodo<char> *aux = lista.GetCabeza();
             while(aux->getNext()!=NULL)
             {
@@ -230,6 +193,7 @@ void CrearArchivo(){
             content += aux->getValue();
             myfile << content;   //content of the new file
             myfile.close();
+            circular->Insertar(nombre);
         }else if(character==24){
             //Salir
             int yMax, xMax;
@@ -237,50 +201,58 @@ void CrearArchivo(){
             clear();
             box(inputwin, 0, 0);
             wrefresh(inputwin);
-            mvprintw(yMax/2, xMax/3, "¡Hasta la proximaaaa!");
+            mvprintw(yMax/2, xMax/3,  "¡Esperamos que te haya sido util! \n                                  adios :)");
             break;
         }else if(character==KEY_BACKSPACE){
-            Cambio nuevo;
-            nuevo.Setbuscar("");
-            nuevo.Setreemplazar("");
-            nuevo.Setestado(false);
-            string palabra="";
-            palabra+=lista.GetLast()->getValue();
-            nuevo.Setpalabra(palabra);
-            nuevo.Setposicion(lista.GetSize());
-            nuevo.Setcadena(CharToString(lista));
-            //("", "", false, lista.GetLast()->getValue(), lista.GetSize(), CharToString(lista));
-            ctrlZ.Push(nuevo);
-            lista.DeleteLast();
+            if(!lista.Empty()){
+                Cambio nuevo;
+                nuevo.Setbuscar("");
+                nuevo.Setreemplazar("");
+                nuevo.Setestado(false);
+                string palabra="";
+                palabra+=lista.GetLast()->getValue();
+                nuevo.Setpalabra(palabra);
+                nuevo.Setposicion(lista.GetSize());
+                nuevo.Setcadena(CharToString(lista));
+                ctrlZ->Push(nuevo);
+                lista.DeleteLast();
+            }
         }else if(character==25){
             //CTRL+Y
-            if(!ctrlY.Empty()){
-                Nodo<Cambio> *change = ctrlY.Pop();
-                ctrlZ.Push(change->getValue());
+            if(!ctrlY->Empty()){
+                Nodo<Cambio> *change = ctrlY->Pop();
+                change->getValue().Setestado(true);
+                ctrlZ->Push(change->getValue());
                 lista = StringToChar(change->getValue().Getcadena());
             }
         }else if(character==26){
             //CTRL+Z
-            if(!ctrlZ.Empty()){
-                Nodo<Cambio> *change = ctrlZ.Pop();
-                ctrlY.Push(change->getValue());
+            if(!ctrlZ->Empty()){
+                Nodo<Cambio> *change = ctrlZ->Pop();
+                change->getValue().Setestado(false);
+                ctrlY->Push(change->getValue());
                 lista = StringToChar(change->getValue().Getcadena());
             }
+        }else if(character==27){
+            //Tecla ESC
+            salida = true;
+            break;
         }else{
             //creo que se debe de vaciar la pila cada vez que se hace una nueva inserción.
-            ctrlY.SuperPop();
+            ctrlY->SuperPop();
             lista.Insertar(character);
             wrefresh(inputwin);
             Cambio nuevo;
-            nuevo.Setbuscar("");
-            nuevo.Setreemplazar("");
+            nuevo.Setbuscar("NULL");
+            nuevo.Setreemplazar("NULL");
             nuevo.Setestado(false);
             string palabra="";
             palabra+=character;
             nuevo.Setpalabra(palabra);
+            nuevo.Setbusqueda(false);
             nuevo.Setposicion(lista.GetSize());
             nuevo.Setcadena(CharToString(lista));
-            ctrlZ.Push(nuevo);
+            ctrlZ->Push(nuevo);
         }
         if(!lista.Empty()){
             wclear(inputwin);
@@ -295,8 +267,44 @@ void CrearArchivo(){
                 aux = aux->getNext();
             }
             char c = aux->getValue();
-                wprintw(inputwin, "%c", c);
+            wprintw(inputwin, "%c", c);
         }
+    }
+    if(salida){
+        clear();
+        refresh();
+        getch();
+        Menu();
+    }
+}
+
+void AbrirArchivo(){
+    string content;
+    string line;
+    echo();
+    int c;
+    string nombre;
+    while(c!=10){
+        c= wgetch(stdscr);
+        if(c==10){
+        }else{
+            nombre+=c;
+        }
+    }
+    ifstream myfile(nombre);
+    if(myfile.is_open()){
+        while( getline(myfile, line)){
+            content += line +"\n";
+        }
+        myfile.close();
+        circular->Insertar(nombre);
+        CrearArchivo(content, true);
+    }else{
+        content="No se ha encontrado el archivo"+nombre;
+        wprintw(stdscr, "No se ha podido abrir el archivo");
+        wrefresh(stdscr);
+        getch();
+        Menu();
     }
 }
 
@@ -325,31 +333,29 @@ void Menu(){
     mvwprintw(inputwin, 14, 5, "4. Salir");
 	refresh();
 	wrefresh(inputwin);
-        int d = getch();
+        int d = wgetch(inputwin);
         if(d==49){
             //Crear Archivo
             clear();
             refresh();
-            CrearArchivo();
-            //mvprintw(15, 5,"%d", d);
-
+            CrearArchivo("", false);
         }else if(d==50){
             //Abrir Archivo
             clear();
             refresh();
+            AbrirArchivo();
         }else if(d==51){
             //Archivos Recientes
             clear();
             refresh();
+            ArchivosRecientes();
         }else if(d==52){
             //Salir
             int yMax, xMax;
             getmaxyx(stdscr, yMax, xMax);
             noecho();
             clear();
-            //box(inputwin, 0, 0);
-            mvprintw(yMax/2, xMax/3, "¡Hasta la proximaaaa!");
-           // wrefresh(inputwin);
+            mvprintw(yMax/2, xMax/3, "¡Esperamos que te haya sido util! \n                                  adios :)");
         }
 }
 
@@ -358,8 +364,6 @@ int main(int argc, char ** argv)
 	initscr();
 	cbreak();
     raw();
-    //int yMax, xMax;
-    //getmaxyx(stdscr, yMax, xMax);
     Menu();
 
 	getch();
@@ -367,21 +371,21 @@ int main(int argc, char ** argv)
 	return 0;
 }
 
-ListaDoble<char> BuscaryReemplazar(ListaDoble<char> lista, string buscado, string remplazo, int x){
+ListaDoble<char> BuscaryReemplazar(ListaDoble<char> lista, string buscado, string remplazo, int x, Pila<Cambio> *ctrlZ){
     cout << "\n Method Starts\n qry: "<<buscado<<"\n";
     Nodo<char> *aux = lista.GetCabeza();
     Nodo<char> *inicio;
     int i=0;
     cout << "\n While Starts\n";
-    while(aux->getNext()!=NULL){
-        if(aux->getPrevious()== NULL || aux->getPrevious()->getValue()==' ' || i>0){    //Verifica que no sean caracteres dentro de una palabra
+    while(aux!=NULL){
+        if(aux->getPrevious() == NULL || aux->getPrevious() == 0 || aux->getPrevious()->getValue()==' ' ||aux->getPrevious()->getValue()=='\n'||aux->getPrevious()->getValue()=='\t'|| i>0){    //Verifica que no sean caracteres dentro de una palabra
             cout <<"\n"<<aux->getValue() <<"compares"<<buscado[i]<<"\n";
             if(aux->getValue()==buscado[i]){
                 if(i==0){
                     inicio = aux;
                 }
                 i++;
-                if(aux->getNext()== NULL || aux->getNext()->getValue()==' ' || aux->getNext()->getValue()=='\n' || i>0){ //Verifica que sea el final de la palabra
+                if(aux->getNext()== NULL || aux->getNext()->getValue()==' ' || aux->getNext()->getValue()=='\n'){ //Verifica que sea el final de la palabra
                     if(i==buscado.size()){
                     cout << buscado.size()<< "\n match " <<remplazo.size() <<"\n";
                         Nodo<char> *anterior;
@@ -398,6 +402,7 @@ ListaDoble<char> BuscaryReemplazar(ListaDoble<char> lista, string buscado, strin
                                 }
                                     anterior = temporal;
                             }else if(e==remplazo.size()){
+                                x++;
                                 if(aux->getNext()==NULL){
                                     temporal->setNext(NULL);
                                 }else{
@@ -415,10 +420,9 @@ ListaDoble<char> BuscaryReemplazar(ListaDoble<char> lista, string buscado, strin
                             anterior = temporal;
                         }
                         i=0;
-                        x++;
-                    }
-                }else{
+                    }else{
                     i=0;
+                    }
                 }
             }else{
                 i=0;
@@ -426,7 +430,18 @@ ListaDoble<char> BuscaryReemplazar(ListaDoble<char> lista, string buscado, strin
         }
         aux= aux->getNext();
     }
-    cout << "\n Method Stops\n";
+    if(x>0){
+        Cambio nuevo;
+        nuevo.Setbuscar(buscado);
+        nuevo.Setreemplazar(remplazo);
+        nuevo.Setestado(false);
+        nuevo.Setpalabra("NULL");
+        nuevo.Setbusqueda(true);
+        nuevo.Setposicion(x);
+        nuevo.Setcadena(CharToString(lista));
+        InsertarEnPila(ctrlZ, nuevo);
+        cout << "\n Method Stops\n";
+    }
     return lista;
 }
 
@@ -451,5 +466,174 @@ string CharToString(ListaDoble<char> lista){
     return content;
 }
 
+int Searching(WINDOW *inputwin, ListaDoble<char> lista, int yMax, Pila<Cambio> *ctrlZ){
+    mvwprintw(inputwin, yMax-5, 3, "Palabra Buscada; Palabra De Reemplazo\n\t");
+            echo();
+            int c;
+            string entrada="";
+            while(c!=10){
+                wrefresh(inputwin);
+                c=wgetch(inputwin);
+                entrada+=c;
+                refresh();
+                wrefresh(inputwin);
+            }
+            string buscado, reemplazo;
+            bool first = true;
+            for(int i = 0 ; i<entrada.size()-1;i++){
+                    if(entrada[i]==';'){
+                        first = false;
+                    }else if(first){
+                        buscado+=entrada[i];
+                    }else{
+                        reemplazo+=entrada[i];
+                    }
+            }
+            mvwprintw(inputwin, yMax-5, 3, "CAMBIANDO...");
+            wrefresh(inputwin);
+            int x;
+            lista.InsertarInicio(' ');
+            lista = BuscaryReemplazar(lista, buscado, reemplazo, x, ctrlZ);
+            lista.DeleteFirst();
+            if(x>0){
+                mvwprintw(inputwin, 0, 0,"La cantida de coincidencias es: %d", x);
+                wrefresh(inputwin);
+            }else{
+                mvwprintw(inputwin, 0, 0,"No hay coincidencias");
+                wrefresh(inputwin);
+            }
+            wrefresh(inputwin);
+            return x;
+}
 
+string GraphLog(Pila<Cambio> *Z, Pila<Cambio> *Y){
+    string head = "digraph G{ \n rankdir=LR \n node[shape=box]; ";
+    string pilaRealizados = "subgraph realizados { \n";
+    string pilaRevertidos = "subgraph revertidos { \n";
 
+    Pila<Cambio> *realizados = new Pila<Cambio>;
+    Pila<Cambio> *revertidos = new Pila<Cambio>;
+    Pila<Cambio> *testRealizados = new Pila<Cambio>;
+    Pila<Cambio> *testRevertidos = new Pila<Cambio>;
+     DuplicatePila(Z, testRealizados);
+     DuplicatePila(Y, testRevertidos);
+     while(!testRealizados->Empty()){
+        Nodo<Cambio> *aux = testRealizados->Pop();
+        Cambio contenido = aux->getValue();
+         if(contenido.Getbusqueda()){
+             realizados->Push(contenido);
+         }
+     }
+     while(!testRevertidos->Empty()){
+        Nodo<Cambio> *aux = testRevertidos->Pop();
+        Cambio contenido = aux->getValue();
+         if(contenido.Getbusqueda()){
+             revertidos->Push(contenido);
+         }
+     }
+     int i=1;     
+     while(!realizados->Empty()){
+        Nodo<Cambio> *aux = realizados->Pop();
+        Cambio contenido = aux->getValue();
+        string value = "\"";
+        value+=to_string(i);
+        value+=" Palabra Buscada:&#92;n";
+        value+=contenido.Getbuscar();
+        value+="&#92;nReemplazada por:&#92;n";
+        value+=contenido.Getreemplazar();
+        value+="&#92;nEstado:&#92;n No revertido";
+        value+="&#92;nPalabra:";
+        value+=contenido.Getpalabra();
+        value+="&#92;nPosicion:&#92;";
+        value+=to_string(contenido.Getposicion());
+        i++;
+        if(!realizados->Empty()){
+        value+="\" -> ";
+        }else{
+        value+="\"; \n";  
+        }
+        pilaRealizados+=value;        
+     }     
+     pilaRealizados+=" label =\" Cambios Realizados\";}";     
+     i=1;
+     while(!revertidos->Empty()){
+        Nodo<Cambio> *aux = revertidos->Pop();
+        Cambio contenido = aux->getValue();
+        std::string test("NULL");
+            string value = "\"";
+            value+=to_string(i);
+            value+=" Palabra Buscada:&#92;n";
+            value+=contenido.Getbuscar();
+            value+="&#92;nReemplazada por:&#92;n";
+            value+=contenido.Getreemplazar();
+            value+="&#92;nEstado:&#92;n Revertido";
+            value+="&#92;nPalabra: ";
+            value+=contenido.Getpalabra();
+            value+="&#92;nPosicion:&#92;";
+            value+=to_string(contenido.Getposicion());
+            i++;
+            if(!revertidos->Empty()){
+            value+="\" -> ";
+            }else{
+            value+="\"; \n";  
+            }
+            pilaRevertidos+=value;        
+     }
+     pilaRevertidos+=" label =\" Cambios Revertidos\";}";
+     head += pilaRealizados+pilaRevertidos+"}";
+     return head;
+}
+
+void InsertarEnPila(Pila<Cambio> *ctrlZ, Cambio change){
+    ctrlZ->Push(change);
+}
+
+void ArchivosRecientes(){
+    box(stdscr, 0, 0);
+    noecho();
+    cbreak();
+    raw();
+    int yMax, xMax, yBeg, xBeg;
+    getmaxyx(stdscr, yMax, xMax);
+    WINDOW * inputwin = newwin(yMax-3, xMax-2, 1, 1);
+    getbegyx(inputwin, yBeg, xBeg);
+    mvprintw(3, 20, "Archivos Recientes");
+    wrefresh(inputwin);
+    
+    keypad(inputwin, TRUE);
+    refresh();
+    wrefresh(inputwin);
+    if(!circular->Empty()){
+        Nodo<string> *aux = circular->GetCabeza();
+        int y = 5;
+        int x = 1;
+        for(int i =0; i<circular->GetSize();i++){
+            mvprintw(y, 20, "%d . %s",x, aux->getValue());
+            refresh();
+        wrefresh(inputwin);
+            y++;
+            x++;
+        }   
+        int c = wgetch(inputwin);
+        if(circular->GetElementAt(c)!=0){
+            ifstream myfile(circular->GetElementAt(c)->getValue());
+            string content, line;
+            if(myfile.is_open()){
+                while( getline(myfile, line)){
+                    content += line +"\n";
+                }
+                myfile.close();
+                CrearArchivo(content, true);
+            }
+        }
+        refresh();
+        wrefresh(inputwin);
+        wrefresh(stdscr);
+    }else{
+        mvprintw(4, 20, "No hay Archivos Recientes");
+        refresh();
+        wrefresh(inputwin);
+        getch();
+        Menu();
+    }
+}

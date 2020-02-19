@@ -23,6 +23,8 @@ class ListaDoble{
 		int Buscar(T objeto);
 		void InsertAfter(Nodo<T> lugar, Nodo<T> nuevo);
 		void DeleteLast();
+		void DeleteFirst();
+		void InsertarInicio(T value);
 };
 template <class T>
 void ListaDoble<T>:: Insertar(T value){
@@ -44,6 +46,25 @@ void ListaDoble<T>:: Insertar(T value){
 			}
 
 		}
+template <class T>
+void ListaDoble<T>:: InsertarInicio(T value){
+            Nodo<T> *nuevo = new Nodo<T>(value);
+			if(!Empty()){
+				nuevo->setNext(cabeza);
+				cabeza->setPrevious(nuevo);
+				cabeza=nuevo;
+				cabeza->setPrevious(NULL);
+			}
+		}
+
+template <class T>
+void ListaDoble<T>:: DeleteFirst(){
+			if(!Empty()){
+				cabeza=cabeza->getNext();
+				cabeza->setPrevious(NULL);
+			}
+		}
+
 template <class T>
 int ListaDoble<T>:: GetSize(){
 	return size;

@@ -18,6 +18,8 @@ class Cambio
         void Setposicion(int val) { posicion = val; }
         string Getcadena() { return cadena; }
         void Setcadena(string val) { cadena = val; }
+        bool Getbusqueda(){return busqueda;}
+        void Setbusqueda(bool val) { busqueda = val;}
         /*Cambio(string buscar, string reemplazar, bool estado, string palabra, int posicion, string cadena){
             this-> buscar = buscar;
             this-> reemplazar = reemplazar;
@@ -35,6 +37,7 @@ class Cambio
         string palabra;
         int posicion;
         string cadena;
+        bool busqueda;
 };
 
 #endif // CAMBIO_H

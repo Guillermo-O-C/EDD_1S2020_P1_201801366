@@ -1,0 +1,7 @@
+digraph G{ 
+ rankdir=LR 
+ node[shape=box]; subgraph realizados { 
+"1 Palabra Buscada:&#92;nhola&#92;nReemplazada por:&#92;neso&#92;nEstado:&#92;n No revertido&#92;nPalabra:NULL&#92;nPosicion:&#92;32777"; 
+ label =" Cambios Realizados";}subgraph revertidos { 
+"1 Palabra Buscada:&#92;nholahola&#92;nReemplazada por:&#92;nmico&#92;nEstado:&#92;n Revertido&#92;nPalabra: NULL&#92;nPosicion:&#92;32761"; 
+ label =" Cambios Revertidos";}}

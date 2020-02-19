@@ -22,6 +22,8 @@ class ListaCicular{
 		int Buscar(T objeto);
 		void InsertAfter(Nodo<T> lugar, Nodo<T> nuevo);
 		void DeleteLast();
+		Nodo<T>* GetElementAt(int id);
+		Nodo<T>* GetCabeza();
 };
 template <class T>
 void ListaCicular<T>:: Insertar(T value){
@@ -44,6 +46,10 @@ void ListaCicular<T>:: Insertar(T value){
 template <class T>
 int ListaCicular<T>:: GetSize(){
 	return size;
+}
+template <class T>
+Nodo<T>* ListaCicular<T>:: GetCabeza(){
+	return cabeza;
 }
 template <class T>
 bool ListaCicular<T>:: Empty(){
@@ -96,6 +102,18 @@ int ListaCicular<T>:: Buscar(T objeto){
 			return i;
 		}
 		aux= aux->getNext();
+	}
+	return 0;
+}
+
+template <class T>
+Nodo<T>* ListaCicular<T>:: GetElementAt(int id){
+	Nodo<T> *aux = this->cabeza;
+	if(id<=size){
+		for(int i = 0; i<id;i++){
+			aux= aux->getNext();
+		}
+		return aux;
 	}
 	return 0;
 }

@@ -9,7 +9,7 @@
 using namespace std;
 
 
-
+/*
 ListaDoble<char> BuscaryReemplazar(ListaDoble<char> lista, string buscado, string remplazo){
     cout << "\n Method Starts\n qry: "<<buscado<<"\n";
     lista.Imprimir();
@@ -87,6 +87,7 @@ ListaDoble<char> StringToChar(string content){
     }
     return newList;
 }
+*/
 
 string CharToString(ListaDoble<char> lista){
     string content;
@@ -99,6 +100,20 @@ string CharToString(ListaDoble<char> lista){
     char c = aux->getValue();
     content+=c;
     return content;
+}
+
+void DuplicatePila(Pila<string> *original, Pila<string> *copia){
+    if(!original->Empty()){
+        cout<<original->GetSize()<<" ";
+        cout <<original->ReturnTop()->getValue()<<"\n";
+        Nodo<string> *aux = original->Pop();
+        DuplicatePila(original, copia);
+        original->Push(aux->getValue());
+        copia->Push(aux->getValue());
+        cout<<original->GetSize();
+    }else{
+        cout<<original->GetSize();
+    }
 }
 int main(){
 	ListaDoble<char> lista;
@@ -130,13 +145,18 @@ int main(){
 	lista.Insertar('l');
 	lista.Insertar('a');
 	lista.Imprimir();
-	lista = BuscaryReemplazar(lista, "Hola", "Bueno Beno");
+	lista.InsertarInicio('F');
+	lista.Imprimir();
+	lista.DeleteFirst();
+	lista.Imprimir();
+	
+	//lista = BuscaryReemplazar(lista, "Hola", "Bueno Beno");
 	cout <<"new string: ";
 	lista.Imprimir();
-	ListaDoble<char> nueva = StringToChar("Hola prros");
-	nueva.Imprimir();
-	string antes = CharToString(nueva);
-	cout <<antes;
+	//ListaDoble<char> nueva = StringToChar("Hola prros");
+	//nueva.Imprimir();
+	//string antes = CharToString(nueva);
+	//cout <<antes;
 	ListaSimple<string> list;
 	list.Insertar(" hola ");
 	list.Insertar(" hijos ");
@@ -155,19 +175,19 @@ int main(){
 	calendario.Insertar(3);
 	calendario.Imprimir();
 
-	Pila<string> pila;
-    pila.Push("hey");
-    cout <<pila.ReturnTop()->getValue();
-    pila.Push("bro");
-    cout <<pila.ReturnTop()->getValue();
-    pila.Pop();
-    cout <<pila.ReturnTop()->getValue();
-    pila.Push("bitch");
-    cout <<pila.ReturnTop()->getValue();
+	Pila<string> *pila = new Pila<string>();
+    pila->Push("hey");
+    cout <<pila->ReturnTop()->getValue();
+    pila->Push("bro");
+    cout <<pila->ReturnTop()->getValue();
+    pila->Pop();
+    cout <<pila->ReturnTop()->getValue();
+    pila->Push("bitch");
+    cout <<pila->ReturnTop()->getValue();
 
-
-
-
-
-	return 0;
+    Pila<string> *segunda= new Pila<string>;
+    DuplicatePila(pila, segunda);
+    cout<<"\n"<<segunda->GetSize();
+    cout <<segunda->ReturnTop()->getValue();
+    return 0;
 };
