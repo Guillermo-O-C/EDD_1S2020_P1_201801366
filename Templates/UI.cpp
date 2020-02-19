@@ -280,6 +280,16 @@ void CrearArchivo(string origin, bool creado){
 }
 
 void AbrirArchivo(){
+    box(stdscr, 0, 0);
+    noecho();
+    cbreak();
+    raw();
+    int yMax, xMax, yBeg, xBeg;
+    getmaxyx(stdscr, yMax, xMax);
+    WINDOW * inputwin = newwin(yMax-3, xMax-2, 1, 1);
+    getbegyx(inputwin, yBeg, xBeg);
+    mvprintw(3, 1, "Ingrese la ruta del archivo...\t");
+    wrefresh(inputwin);
     string content;
     string line;
     echo();
@@ -302,7 +312,7 @@ void AbrirArchivo(){
         CrearArchivo(content, true);
     }else{
         content="No se ha encontrado el archivo"+nombre;
-        wprintw(stdscr, "No se ha podido abrir el archivo");
+        wprintw(stdscr, "\nNo se ha podido abrir el archivo");
         wrefresh(stdscr);
         getch();
         Menu();
@@ -612,7 +622,7 @@ void ArchivosRecientes(){
         int x = 1;
         for(int i =0; i<circular->GetSize();i++){
             string val = aux->getValue();
-            mvprintw(y, 19, "%d . ", i+1);
+            mvprintw(y, 19, "%d .\t ", i+1);
             string name;
             bool flag=false;
             int last = 0;
@@ -660,7 +670,13 @@ void ArchivosRecientes(){
                 }
                 myfile.close();
                 CrearArchivo(content, true);
-            }
+            }else{
+                content="No se ha encontrado el archivo";
+                wprintw(stdscr, "No se ha podido abrir el archivo");
+                wrefresh(stdscr);
+                getch();
+                Menu();
+            }            
         }
         refresh();
         wrefresh(inputwin);
@@ -697,7 +713,7 @@ string RecentFiles(ListaCicular<string> *circle){
                     flag=true;
                 }
             }
-            content+="\""+to_string(i)+name+"&#92;n"+aux->getValue()+"\"->"+"\"0"+firstname+"&#92;n"+circle->GetCabeza()->getValue()+"\";";
+            content+="\""+to_string(i)+" "+name+"&#92;n"+aux->getValue()+"\"->"+"\"0 "+firstname+"&#92;n"+circle->GetCabeza()->getValue()+"\";";
         }else{
             string val = aux->getValue();
             string path = "";
@@ -715,7 +731,7 @@ string RecentFiles(ListaCicular<string> *circle){
                     flag=true;
                 }
             }
-            content+="\""+to_string(i)+name+"&#92;n"+aux->getValue()+"\"->";
+            content+="\""+to_string(i)+" "+name+"&#92;n"+aux->getValue()+"\"->";
             if(i==0){
                 firstname=name;
             }
