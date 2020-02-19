@@ -1,0 +1,8 @@
+digraph G{ 
+ rankdir=LR 
+ node[shape=box]; "0hola&#92;nSavedFiles/hola.ttxt
+"->"1min&#92;nSavedFiles/min.txt
+"->"2mini&#92;nSavedFiles/mini.txt
+"->"3bueno&#92;nSavedFiles/bueno.tct
+"->"0hola&#92;nSavedFiles/hola.ttxt
+";}

@@ -18,6 +18,7 @@ int Searching(WINDOW *win, ListaDoble<char> lista, int yMax, Pila<Cambio> *ctrlZ
 string GraphLog(Pila<Cambio> *Z, Pila<Cambio> *Y);
 void InsertarEnPila(Pila<Cambio> *ctrlZ, Cambio change);
 void ArchivosRecientes();
+string RecentFiles(ListaCicular<string> *circle);
 //changed all lista for list
 string  GraphDoubleList(ListaDoble<char> lista){
     std::string graph ("digraph ReporteLD { graph [dpi=300]\n rankdir =LR; \n size=\"5\" \n node [shape = circle]; \n");
@@ -193,7 +194,7 @@ void CrearArchivo(string origin, bool creado){
             content += aux->getValue();
             myfile << content;   //content of the new file
             myfile.close();
-            circular->Insertar(nombre);
+            circular->Insertar(entrada);
         }else if(character==24){
             //Salir
             int yMax, xMax;
@@ -334,6 +335,7 @@ void Menu(){
 	refresh();
 	wrefresh(inputwin);
         int d = wgetch(inputwin);
+        refresh();
         if(d==49){
             //Crear Archivo
             clear();
@@ -598,6 +600,7 @@ void ArchivosRecientes(){
     WINDOW * inputwin = newwin(yMax-3, xMax-2, 1, 1);
     getbegyx(inputwin, yBeg, xBeg);
     mvprintw(3, 20, "Archivos Recientes");
+    mvprintw(yMax-7, 20, "Presione X para generar Reporte");
     wrefresh(inputwin);
     
     keypad(inputwin, TRUE);
@@ -608,14 +611,47 @@ void ArchivosRecientes(){
         int y = 5;
         int x = 1;
         for(int i =0; i<circular->GetSize();i++){
-            mvprintw(y, 20, "%d . %s",x, aux->getValue());
+            string val = aux->getValue();
+            mvprintw(y, 19, "%d . ", i+1);
+            string name;
+            bool flag=false;
+            int last = 0;
+            for(int e=0; e<val.size();e++){
+                mvprintw(y, 20+e, "%c", val[e]);
+                if(flag){
+                    name+=val[e];
+                }
+                if(val[e]=='/'){
+                    name="";
+                    flag=true;
+                }
+                
+                last=20+e;
+            }
+            for(int u =0; u<name.size();u++){
+                mvprintw(y, last+5+u, "%c", name[u]);
+            }
             refresh();
-        wrefresh(inputwin);
+            wrefresh(inputwin);
             y++;
             x++;
+            aux=aux->getNext();
         }   
         int c = wgetch(inputwin);
-        if(circular->GetElementAt(c)!=0){
+        if(c==120){
+            ofstream graphFile;
+            string name = "RecentFiles";
+            graphFile.open("SavedFiles/"+name+".txt");
+            graphFile << RecentFiles(circular);
+            graphFile.close();
+            std::string filePath="dot -Tpng SavedFiles/"+name+".txt -o SavedFiles/"+name+".png";
+            system(filePath.c_str());
+            mvwprintw(inputwin, yMax-5,3, "GENERANDO GRAFICO...");
+            wgetch(inputwin);
+            wrefresh(inputwin);
+            getch();
+            Menu();
+        }else if(circular->GetElementAt(c)!=0){
             ifstream myfile(circular->GetElementAt(c)->getValue());
             string content, line;
             if(myfile.is_open()){
@@ -636,4 +672,56 @@ void ArchivosRecientes(){
         getch();
         Menu();
     }
+}
+
+string RecentFiles(ListaCicular<string> *circle){    
+    string head = "digraph G{ \n rankdir=LR \n node[shape=box]; ";
+    string content;
+    string firstname;
+    Nodo<string> *aux = circle->GetCabeza();
+    for(int i =0;i<circle->GetSize(); i++){
+        if(i==circle->GetSize()-1){            
+            string val = aux->getValue();
+            string path = "";
+            string name="";
+            bool flag = false;
+            for(int e=0; e<val.size();e++){
+                if(val[e]=='.'){
+                    flag=false;
+                }
+                if(flag){
+                    name+=val[e];
+                }
+                if(val[e]=='/'){
+                    name="";
+                    flag=true;
+                }
+            }
+            content+="\""+to_string(i)+name+"&#92;n"+aux->getValue()+"\"->"+"\"0"+firstname+"&#92;n"+circle->GetCabeza()->getValue()+"\";";
+        }else{
+            string val = aux->getValue();
+            string path = "";
+            string name="";
+            bool flag = false;
+            for(int e=0; e<val.size();e++){
+                if(val[e]=='.'){
+                    flag=false;
+                }
+                if(flag){
+                    name+=val[e];
+                }
+                if(val[e]=='/'){
+                    name="";
+                    flag=true;
+                }
+            }
+            content+="\""+to_string(i)+name+"&#92;n"+aux->getValue()+"\"->";
+            if(i==0){
+                firstname=name;
+            }
+        }
+        aux=aux->getNext();
+    }
+    head+=content+"}";
+    return head;
 }

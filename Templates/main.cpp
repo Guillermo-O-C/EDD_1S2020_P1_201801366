@@ -175,6 +175,10 @@ int main(){
 	calendario.Insertar(3);
 	calendario.Imprimir();
 
+    ListaCicular<string> *no = new ListaCicular<string>;
+    no->Insertar("hola");
+    cout <<no->GetCabeza()->getValue();
+
 	Pila<string> *pila = new Pila<string>();
     pila->Push("hey");
     cout <<pila->ReturnTop()->getValue();
